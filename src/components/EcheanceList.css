@@ -272,6 +272,7 @@
   overflow: hidden;
 }
 
+
 .echeance-card::before {
   content: '';
   position: absolute;

@@ -58,26 +58,41 @@ export default function EcheanceForm({
         throw new Error('La date est requise')
       }
 
-      const now = new Date().toISOString()
-      const data = {
-        titre: titre.trim(),
-        montant: montantValue,
-        date: new Date(date + 'T00:00:00.000Z').toISOString(),
-        owner: user.id,
-        created_at: now,
-        updated_at: now,
-      }
-
       if (echeance?.id) {
-        const { error } = await supabase
+        // Mise à jour d'une échéance existante
+        // Ne pas envoyer created_at et updated_at (gérés par la DB)
+        const updateData = {
+          titre: titre.trim(),
+          montant: montantValue,
+          date: new Date(date + 'T00:00:00.000Z').toISOString(),
+          // owner ne change pas lors d'une mise à jour
+        }
+        
+        console.log('Updating echeance:', echeance.id, 'with data:', updateData)
+        
+        const { data: updatedData, error } = await supabase
           .from('echeances')
-          .update(data)
+          .update(updateData)
           .eq('id', echeance.id)
+          .select()
+        
         if (error) {
           console.error('Supabase update error:', error)
           throw new Error(error.message || `Erreur Supabase: ${JSON.stringify(error)}`)
         }
+        
+        console.log('Échéance mise à jour avec succès:', updatedData)
       } else {
+        // Création d'une nouvelle échéance
+        const now = new Date().toISOString()
+        const data = {
+          titre: titre.trim(),
+          montant: montantValue,
+          date: new Date(date + 'T00:00:00.000Z').toISOString(),
+          owner: user.id,
+          created_at: now,
+          updated_at: now,
+        }
         const { error } = await supabase.from('echeances').insert([data])
         if (error) {
           console.error('Supabase insert error:', error)

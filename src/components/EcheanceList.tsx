@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import EcheanceForm from './EcheanceForm'
@@ -23,31 +23,7 @@ export default function EcheanceList() {
   const [filter, setFilter] = useState<'all' | 'paid' | 'unpaid'>('all')
   const [dateFilter, setDateFilter] = useState('')
 
-  useEffect(() => {
-    loadEcheances()
-
-    const channel = supabase
-      .channel('echeances-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'echeances',
-        },
-        (payload: RealtimePostgresChangesPayload<any>) => {
-          console.log('Realtime event:', payload)
-          loadEcheances()
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [])
-
-  const loadEcheances = async () => {
+  const loadEcheances = useCallback(async () => {
     try {
       const {
         data: { user },
@@ -80,21 +56,59 @@ export default function EcheanceList() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filter, dateFilter])
 
   useEffect(() => {
     loadEcheances()
-  }, [filter, dateFilter])
+
+    const channel = supabase
+      .channel('echeances-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'echeances',
+        },
+        (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
+          console.log('Realtime event:', payload)
+          loadEcheances()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [loadEcheances])
+
+  useEffect(() => {
+    loadEcheances()
+  }, [filter, dateFilter, loadEcheances])
 
   const handleTogglePaid = async (id: number, currentPaid: boolean) => {
     try {
-      const { error } = await supabase
+      const newPaidStatus = !currentPaid
+      console.log(`Toggling paid status for echeance ${id} from ${currentPaid} to ${newPaidStatus}`)
+      
+      const { data: updatedData, error } = await supabase
         .from('echeances')
-        .update({ paid: !currentPaid })
+        .update({ paid: newPaidStatus })
         .eq('id', id)
-      if (error) throw error
+        .select()
+      
+      if (error) {
+        console.error('Error updating paid status:', error)
+        throw error
+      }
+      
+      console.log('Paid status updated successfully:', updatedData)
+      
+      // Recharger la liste pour voir le changement
+      await loadEcheances()
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
+      console.error('Toggle paid error:', error)
       alert('Erreur: ' + errorMessage)
     }
   }
@@ -113,8 +127,16 @@ export default function EcheanceList() {
   }
 
   const handleEdit = (echeance: Echeance) => {
+    console.log('Editing echeance:', echeance)
     setEditingEcheance(echeance)
     setShowForm(true)
+    // Scroll vers le formulaire pour une meilleure UX
+    setTimeout(() => {
+      const formElement = document.querySelector('.echeance-form-container')
+      if (formElement) {
+        formElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }, 100)
   }
 
   const handleFormSuccess = () => {
@@ -252,7 +274,7 @@ export default function EcheanceList() {
           <select
             id="status-filter"
             value={filter}
-            onChange={(e) => setFilter(e.target.value as any)}
+            onChange={(e) => setFilter(e.target.value as 'all' | 'paid' | 'unpaid')}
             className="filter-select"
           >
             <option value="all">Toutes</option>
@@ -306,11 +328,10 @@ export default function EcheanceList() {
         </div>
       ) : (
         <div className="echeances-grid">
-          {echeances.map((echeance, index) => (
+          {echeances.map((echeance) => (
             <div
               key={echeance.id}
               className={`echeance-card ${echeance.paid ? 'echeance-paid' : 'echeance-unpaid'}`}
-              style={{ animationDelay: `${index * 50}ms` }}
             >
               <div className="card-header">
                 <h3 className="card-title">{echeance.titre}</h3>
