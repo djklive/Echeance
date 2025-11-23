@@ -1,3 +1,44 @@
+# Déployer l'Edge Function via le Dashboard Supabase
+
+## Problème : Pas de privilèges pour utiliser le CLI
+
+Si vous obtenez l'erreur "Your account does not have the necessary privileges", vous pouvez déployer la fonction directement via le Dashboard Supabase.
+
+## Solution : Déployer via le Dashboard
+
+### Étape 1 : Accéder aux Edge Functions
+
+1. Allez sur https://supabase.com/dashboard
+2. Sélectionnez votre projet
+3. Dans le menu de gauche, cliquez sur **Edge Functions**
+
+### Étape 2 : Créer une nouvelle fonction
+
+1. Cliquez sur **Create a new function** ou **New Function**
+2. Nommez-la : `notify-echeance`
+3. Cliquez sur **Create function**
+
+### Étape 3 : Copier le code
+
+1. Ouvrez le fichier `supabase/functions/notify-echeance/index.ts` dans votre éditeur
+2. Copiez tout le contenu du fichier
+3. Collez-le dans l'éditeur de code du Dashboard Supabase
+
+### Étape 4 : Déployer
+
+1. Cliquez sur **Deploy** ou **Save**
+2. Attendez que le déploiement se termine (quelques secondes)
+
+### Étape 5 : Vérifier
+
+1. La fonction devrait apparaître dans la liste des Edge Functions
+2. Vous pouvez tester en cliquant sur **Invoke function**
+
+## Code à copier
+
+Voici le code complet de la fonction (déjà dans `supabase/functions/notify-echeance/index.ts`) :
+
+```typescript
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -85,22 +126,6 @@ serve(async (req) => {
       body: `Bonjour,\n\nVous avez une échéance à venir:\n\nTitre: ${echeance.titre}\nMontant: ${echeance.montant} FCFA\nDate: ${new Date(echeance.date).toLocaleDateString('fr-FR')}\n\nCordialement`,
     })
 
-    // Example: If you want to use a service like Resend, you would do:
-    // const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
-    // const response = await fetch('https://api.resend.com/emails', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Authorization': `Bearer ${RESEND_API_KEY}`,
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({
-    //     from: 'noreply@yourdomain.com',
-    //     to: userEmail,
-    //     subject: `Rappel: Échéance "${echeance.titre}"`,
-     //     html: `<p>Bonjour,<br><br>Vous avez une échéance à venir:<br><br>Titre: ${echeance.titre}<br>Montant: ${echeance.montant} FCFA<br>Date: ${new Date(echeance.date).toLocaleDateString('fr-FR')}</p>`,
-    //   }),
-    // })
-
     return new Response(
       JSON.stringify({
         success: true,
@@ -123,4 +148,38 @@ serve(async (req) => {
     )
   }
 })
+```
+
+## Tester la fonction
+
+Après le déploiement, vous pouvez tester la fonction :
+
+1. Dans le Dashboard, cliquez sur la fonction `notify-echeance`
+2. Cliquez sur **Invoke function**
+3. Ajoutez le body JSON :
+   ```json
+   {
+     "echeanceId": 1,
+     "userEmail": "votre@email.com"
+   }
+   ```
+4. Ajoutez l'en-tête `Authorization` avec votre token JWT (vous pouvez le récupérer depuis la console du navigateur quand vous êtes connecté)
+5. Cliquez sur **Invoke**
+
+## Vérifier que ça fonctionne dans l'app
+
+Une fois déployée, la fonction devrait fonctionner dans votre application. Testez en cliquant sur le bouton "Notifier" sur une échéance.
+
+## Alternative : Désactiver temporairement
+
+Si vous ne voulez pas utiliser l'Edge Function pour l'instant, vous pouvez modifier le code pour désactiver le bouton ou afficher un message :
+
+Dans `src/components/EcheanceList.tsx`, modifiez `handleNotify` :
+
+```typescript
+const handleNotify = async (echeance: Echeance) => {
+  alert('Fonctionnalité de notification en cours de développement')
+  // Ou simplement ne pas appeler la fonction
+}
+```
 

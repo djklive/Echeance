@@ -133,19 +133,31 @@ export default function EcheanceList() {
       const {
         data: { user },
       } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) {
+        alert('Vous devez être connecté pour envoyer une notification')
+        return
+      }
 
-      const { error } = await supabase.functions.invoke('notify-echeance', {
+      const {
+        data,
+        error,
+      } = await supabase.functions.invoke('notify-echeance', {
         body: {
           echeanceId: echeance.id,
           userEmail: user.email,
         },
       })
 
-      if (error) throw error
-      alert('Notification envoyée !')
+      if (error) {
+        console.error('Edge Function error:', error)
+        throw error
+      }
+
+      console.log('Notification response:', data)
+      alert('Notification envoyée avec succès !')
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
+      console.error('Notification error:', error)
       alert('Erreur lors de l\'envoi de la notification: ' + errorMessage)
     }
   }

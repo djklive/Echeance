@@ -48,11 +48,24 @@ export default function EcheanceForm({
       } = await supabase.auth.getUser()
       if (!user) throw new Error('Utilisateur non connecté')
 
+      // Validation des données
+      const montantValue = parseFloat(montant)
+      if (isNaN(montantValue) || montantValue < 0) {
+        throw new Error('Le montant doit être un nombre positif')
+      }
+
+      if (!date) {
+        throw new Error('La date est requise')
+      }
+
+      const now = new Date().toISOString()
       const data = {
-        titre,
-        montant: parseFloat(montant),
-        date: new Date(date).toISOString(),
+        titre: titre.trim(),
+        montant: montantValue,
+        date: new Date(date + 'T00:00:00.000Z').toISOString(),
         owner: user.id,
+        created_at: now,
+        updated_at: now,
       }
 
       if (echeance?.id) {
@@ -60,15 +73,23 @@ export default function EcheanceForm({
           .from('echeances')
           .update(data)
           .eq('id', echeance.id)
-        if (error) throw error
+        if (error) {
+          console.error('Supabase update error:', error)
+          throw new Error(error.message || `Erreur Supabase: ${JSON.stringify(error)}`)
+        }
       } else {
         const { error } = await supabase.from('echeances').insert([data])
-        if (error) throw error
+        if (error) {
+          console.error('Supabase insert error:', error)
+          console.error('Data being inserted:', data)
+          throw new Error(error.message || `Erreur Supabase: ${JSON.stringify(error)}`)
+        }
       }
 
       onSuccess()
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
+      console.error('Form submission error:', error)
       alert('Erreur: ' + errorMessage)
     } finally {
       setLoading(false)
@@ -119,7 +140,7 @@ export default function EcheanceForm({
               Montant <span className="required">*</span>
             </label>
             <div className="input-with-icon">
-              <span className="input-icon">FCFA</span>
+              <span className="input-icon">F</span>
               <input
                 id="montant"
                 type="number"
