@@ -59,9 +59,15 @@
 /* Stats */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: var(--spacing-lg);
   margin-top: var(--spacing-xl);
+}
+
+@media (min-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .stat-card {
@@ -74,16 +80,54 @@
   gap: var(--spacing-md);
   box-shadow: var(--shadow-sm);
   transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--border-light);
+  transition: all var(--transition-base);
+}
+
+.stat-card-total::before {
+  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+}
+
+.stat-card-unpaid::before {
+  background: linear-gradient(90deg, var(--warning) 0%, #fbbf24 100%);
+}
+
+.stat-card-paid::before {
+  background: linear-gradient(90deg, var(--success) 0%, #34d399 100%);
 }
 
 .stat-card:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
+  border-color: var(--primary);
+}
+
+.stat-card-total:hover {
+  border-color: var(--primary);
+}
+
+.stat-card-unpaid:hover {
+  border-color: var(--warning);
+}
+
+.stat-card-paid:hover {
+  border-color: var(--success);
 }
 
 .stat-icon {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
@@ -94,16 +138,19 @@
 .stat-icon-total {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
   color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 .stat-icon-unpaid {
   background: linear-gradient(135deg, var(--warning) 0%, #fbbf24 100%);
   color: white;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
 .stat-icon-paid {
   background: linear-gradient(135deg, var(--success) 0%, #34d399 100%);
   color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .stat-content {
@@ -121,6 +168,20 @@
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
+  line-height: 1.2;
+}
+
+.stat-value-large {
+  font-size: var(--font-size-3xl);
+  font-weight: 800;
+  margin-bottom: var(--spacing-xs);
+}
+
+.stat-sublabel {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin: var(--spacing-xs) 0 0 0;
+  font-weight: 500;
 }
 
 /* Filters */

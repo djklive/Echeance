@@ -184,9 +184,14 @@ export default function EcheanceList() {
     }
   }
 
+  // Calcul des statistiques
   const totalMontant = echeances.reduce((sum, e) => sum + e.montant, 0)
-  const unpaidCount = echeances.filter(e => !e.paid).length
-  const paidCount = echeances.filter(e => e.paid).length
+  const unpaidEcheances = echeances.filter(e => !e.paid)
+  const paidEcheances = echeances.filter(e => e.paid)
+  const unpaidCount = unpaidEcheances.length
+  const paidCount = paidEcheances.length
+  const unpaidMontant = unpaidEcheances.reduce((sum, e) => sum + e.montant, 0)
+  const paidMontant = paidEcheances.reduce((sum, e) => sum + e.montant, 0)
 
   if (loading) {
     return (
@@ -221,7 +226,7 @@ export default function EcheanceList() {
         </div>
 
         <div className="stats-grid">
-          <div className="stat-card">
+          <div className="stat-card stat-card-total">
             <div className="stat-icon stat-icon-total">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="12" y1="1" x2="12" y2="23" />
@@ -229,11 +234,12 @@ export default function EcheanceList() {
               </svg>
             </div>
             <div className="stat-content">
-              <p className="stat-label">Total</p>
-              <p className="stat-value">{totalMontant.toFixed(2)} FCFA</p>
+              <p className="stat-label">Total Général</p>
+              <p className="stat-value stat-value-large">{totalMontant.toFixed(2)} FCFA</p>
+              <p className="stat-sublabel">{echeances.length} échéance{echeances.length > 1 ? 's' : ''}</p>
             </div>
           </div>
-          <div className="stat-card">
+          <div className="stat-card stat-card-unpaid">
             <div className="stat-icon stat-icon-unpaid">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10" />
@@ -242,11 +248,12 @@ export default function EcheanceList() {
               </svg>
             </div>
             <div className="stat-content">
-              <p className="stat-label">Non payées</p>
-              <p className="stat-value">{unpaidCount}</p>
+              <p className="stat-label">Non Payées</p>
+              <p className="stat-value stat-value-large">{unpaidMontant.toFixed(2)} FCFA</p>
+              <p className="stat-sublabel">{unpaidCount} échéance{unpaidCount > 1 ? 's' : ''} en attente</p>
             </div>
           </div>
-          <div className="stat-card">
+          <div className="stat-card stat-card-paid">
             <div className="stat-icon stat-icon-paid">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polyline points="20 6 9 17 4 12" />
@@ -254,7 +261,8 @@ export default function EcheanceList() {
             </div>
             <div className="stat-content">
               <p className="stat-label">Payées</p>
-              <p className="stat-value">{paidCount}</p>
+              <p className="stat-value stat-value-large">{paidMontant.toFixed(2)} FCFA</p>
+              <p className="stat-sublabel">{paidCount} échéance{paidCount > 1 ? 's' : ''} réglée{paidCount > 1 ? 's' : ''}</p>
             </div>
           </div>
         </div>
