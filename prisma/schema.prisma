@@ -1,0 +1,22 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model echeance {
+  id        Int      @id @default(autoincrement())
+  titre     String
+  montant   Float
+  date      DateTime
+  paid      Boolean  @default(false)
+  owner     String   // uuid de l'utilisateur Supabase
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("echeances")
+}
+
