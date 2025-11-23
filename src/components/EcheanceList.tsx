@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import EcheanceForm from './EcheanceForm'
 import './EcheanceList.css'
@@ -34,7 +35,7 @@ export default function EcheanceList() {
           schema: 'public',
           table: 'echeances',
         },
-        (payload) => {
+        (payload: RealtimePostgresChangesPayload<any>) => {
           console.log('Realtime event:', payload)
           loadEcheances()
         }
