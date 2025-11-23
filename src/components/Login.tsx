@@ -53,8 +53,8 @@ export default function Login() {
           throw error
         }
       }
-    } catch (error: any) {
-      const errorMessage = error.message || 'Une erreur est survenue'
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
       setMessage(errorMessage)
       setMessageType('error')
       console.error('Erreur d\'authentification:', error)

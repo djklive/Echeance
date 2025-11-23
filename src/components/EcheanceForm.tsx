@@ -67,8 +67,9 @@ export default function EcheanceForm({
       }
 
       onSuccess()
-    } catch (error: any) {
-      alert('Erreur: ' + error.message)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
+      alert('Erreur: ' + errorMessage)
     } finally {
       setLoading(false)
     }
@@ -118,7 +119,7 @@ export default function EcheanceForm({
               Montant <span className="required">*</span>
             </label>
             <div className="input-with-icon">
-              <span className="input-icon">€</span>
+              <span className="input-icon">FCFA</span>
               <input
                 id="montant"
                 type="number"

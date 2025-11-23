@@ -73,9 +73,10 @@ export default function EcheanceList() {
       const { data, error } = await query
       if (error) throw error
       setEcheances(data || [])
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
       console.error('Erreur lors du chargement:', error)
-      alert('Erreur: ' + error.message)
+      alert('Erreur: ' + errorMessage)
     } finally {
       setLoading(false)
     }
@@ -92,8 +93,9 @@ export default function EcheanceList() {
         .update({ paid: !currentPaid })
         .eq('id', id)
       if (error) throw error
-    } catch (error: any) {
-      alert('Erreur: ' + error.message)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
+      alert('Erreur: ' + errorMessage)
     }
   }
 
@@ -104,8 +106,9 @@ export default function EcheanceList() {
     try {
       const { error } = await supabase.from('echeances').delete().eq('id', id)
       if (error) throw error
-    } catch (error: any) {
-      alert('Erreur: ' + error.message)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
+      alert('Erreur: ' + errorMessage)
     }
   }
 
@@ -141,8 +144,9 @@ export default function EcheanceList() {
 
       if (error) throw error
       alert('Notification envoyée !')
-    } catch (error: any) {
-      alert('Erreur lors de l\'envoi de la notification: ' + error.message)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue'
+      alert('Erreur lors de l\'envoi de la notification: ' + errorMessage)
     }
   }
 
@@ -192,7 +196,7 @@ export default function EcheanceList() {
             </div>
             <div className="stat-content">
               <p className="stat-label">Total</p>
-              <p className="stat-value">{totalMontant.toFixed(2)} €</p>
+              <p className="stat-value">{totalMontant.toFixed(2)} FCFA</p>
             </div>
           </div>
           <div className="stat-card">
@@ -307,7 +311,7 @@ export default function EcheanceList() {
                 <div className="card-info">
                   <div className="info-item">
                     <span className="info-label">Montant</span>
-                    <span className="info-value amount">{echeance.montant.toFixed(2)} €</span>
+                    <span className="info-value amount">{echeance.montant.toFixed(2)} FCFA</span>
                   </div>
                   <div className="info-item">
                     <span className="info-label">Date</span>
